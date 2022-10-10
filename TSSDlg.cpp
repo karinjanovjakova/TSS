@@ -254,8 +254,8 @@ void CTSSDlg::OnFileOpen()
 {
 	CString FileName, FilePath;
 	FileInfo file;
-	TCHAR szFilters[] = _T(" BMP file(*.bmp) |*.bmp| JPG file(*.jpg) |*.jpg| PNG file(*.png) |*.png| | ");
-	CFileDialog dlg(TRUE, _T(""), _T("*,*"), OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, szFilters);
+	TCHAR szFilters[] = _T(" BMP file(*.bmp) |*.bmp| JPG file(*.jpg) |*.jpg| PNG file(*.png) |*.png|| ");
+	CFileDialog dlg(TRUE, _T(""), _T("*,*"), OFN_ALLOWMULTISELECT|OFN_FILEMUSTEXIST, szFilters);
 	if (dlg.DoModal() == IDOK)
 	{
 
@@ -264,8 +264,16 @@ void CTSSDlg::OnFileOpen()
 		{
 			file.FilePath = dlg.GetNextPathName(pos);
 			file.FileName = file.FilePath.Mid(file.FilePath.ReverseFind(_T('\\'))+1);
-			m_loadedFiles.push_back(file);
-			//AfxMessageBox(Name);
+			int already_loaded = 0;
+			for (int i = 0; i < m_loadedFiles.size(); i++)
+			{
+				if (m_loadedFiles[i].FileName == file.FileName)
+					already_loaded += 1;
+			}
+			if (already_loaded == 0)
+				m_loadedFiles.push_back(file);
+			else 
+				AfxMessageBox(file.FileName + _T(" is already open."));
 		}
 	}
 	m_fileList.DeleteAllItems();
