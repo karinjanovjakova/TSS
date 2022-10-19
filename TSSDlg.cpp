@@ -7,10 +7,24 @@
 #include "TSS.h"
 #include "TSSDlg.h"
 #include "afxdialogex.h"
+#include <gdiplus.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+class CStaticImage :public CStatic
+{
+public:
+	void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) override;
+};
+
+class CStaticHist :public CStatic
+{
+public:
+	void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) override;
+};
+
 
 
 // CAboutDlg dialog used for App About
@@ -69,17 +83,16 @@ void CTSSDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTSSDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
-	//ON_MESSAGE(WM_DRAW_IMAGE, OnDrawImage)
-	//ON_MESSAGE(WM_DRAW_HISTOGRAM, OnDrawHist)
+	ON_MESSAGE(WM_DRAW_IMAGE, OnDrawImage)
+	ON_MESSAGE(WM_DRAW_HISTOGRAM, 
+		OnDrawHist)
 	ON_WM_QUERYDRAGICON()
-	//ON_COMMAND(ID_MENU_FILE_OPEN, &CTSSDlg::OnMenuFileOpen)
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
 	ON_WM_TIMER()
 	//ON_COMMAND(ID_HISTOGRAM_R, &CTSSDlg::OnHistogramR)
 	//ON_COMMAND(ID_HISTOGRAM_G, &CTSSDlg::OnHistogramG)
 	//ON_COMMAND(ID_HISTOGRAM_B, &CTSSDlg::OnHistogramB)
-	//ON_COMMAND(ID_MENU_FILE_CLOSE, &CTSSDlg::OnMenuFileClose)
 	//ON_NOTIFY(LVN_ITEMCHANGED,IDC_FILE_LIST1, &CTSSDlg::OnLvnItemChangedFileList1)
 	//ON_COMMAND(ID_EFFECT_POSTER_16, &CTSSDlg::OnEffectPoster16)
 	//ON_COMMAND(ID_EFFECT_POSTER_32, &CTSSDlg::OnEffectPoster32)
@@ -89,6 +102,7 @@ BEGIN_MESSAGE_MAP(CTSSDlg, CDialogEx)
 	ON_WM_GETMINMAXINFO()
 	ON_COMMAND(ID_FILE_OPEN, &CTSSDlg::OnFileOpen)
 	ON_COMMAND(ID_FILE_CLOSE, &CTSSDlg::OnFileClose)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -111,7 +125,7 @@ BOOL CTSSDlg::OnInitDialog()
 	mstatich_Tborder = mrecth.top;
 	mstatich_Rborder = recth.right - mrecth.right;
 	mstatich_Bborder = recth.bottom - mrecth.bottom;
-
+	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 	// Add "About..." menu item to system menu.
 
 	// IDM_ABOUTBOX must be in the system command range.
@@ -227,28 +241,12 @@ void CTSSDlg::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI)
 	//lpMMI->ptMinTrackSize.y = this->mrect.Height();
 	lpMMI->ptMinTrackSize.x = 500;
 	lpMMI->ptMinTrackSize.y = 400;
-	// TODO: Add your message handler code here and/or call default
 
 	CDialogEx::OnGetMinMaxInfo(lpMMI);
 }
 
 
-/*
-void CTSSDlg::OnSize(UINT nType, int cx, int cy)
-{
-	//CRect rect;
 
-	CDialogEx::OnSize(nType, cx, cy);
-
-	// TODO: Add your message handler code here
-	if (::IsWindow(this->m_staticImage))
-	{
-		this->m_staticImage.GetClientRect(&mrect)
-		this->m_staticHistogram.GetWindowRect(&rect);
-		this->m_staticImage.SetWindowPos(nullptr, 0, 0, cx - rect.Width(), cy, SWP_NOMOVE);
-		Invalidate(1);
-	}
-}*/
 
 void CTSSDlg::OnFileOpen()
 {
@@ -258,7 +256,6 @@ void CTSSDlg::OnFileOpen()
 	CFileDialog dlg(TRUE, _T(""), _T("*,*"), OFN_ALLOWMULTISELECT|OFN_FILEMUSTEXIST, szFilters);
 	if (dlg.DoModal() == IDOK)
 	{
-
 		POSITION pos = dlg.GetStartPosition();
 		while (pos)
 		{
@@ -301,4 +298,57 @@ void CTSSDlg::OnFileClose()
 		m_fileList.InsertItem(m_loadedFiles.size(), m_loadedFiles[i].FileName);
 		m_fileList.Update(m_loadedFiles.size());
 	}
+}
+
+
+void CStaticImage::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
+	GetParent()->SendMessage(CTSSDlg::WM_DRAW_IMAGE, (WPARAM) lpDrawItemStruct);
+}
+
+void CStaticHist::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
+	GetParent()->SendMessage(CTSSDlg::WM_DRAW_HISTOGRAM, (WPARAM) lpDrawItemStruct);
+}
+
+LRESULT CTSSDlg::OnDrawImage(WPARAM wParam, LPARAM lparam) {
+	return LRESULT();
+
+}
+
+LRESULT CTSSDlg::OnDrawHist(WPARAM wParam, LPARAM lparam) {
+	double width;
+	double height;
+	LPDRAWITEMSTRUCT lpDI = (LPDRAWITEMSTRUCT)wParam;
+
+	Gdiplus::Graphics* GraphCDC = Gdiplus::Graphics::FromHDC(lpDI->hDC);
+	
+	return LRESULT();
+}
+
+
+void CTSSDlg::CalcHistStruct(FileInfo* file) {
+	Gdiplus::BitmapData bmpData;
+	Gdiplus::Rect bmpRect(0, 0, file->bitmap->GetWidth(), file->bitmap->GetHeight());
+	unsigned int* pBmpScan;
+	unsigned int bmpPixel;
+	unsigned int bmpStride;
+	file->bitmap->LockBits(&bmpRect, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB, &bmpData);
+	pBmpScan = (unsigned int*)bmpData.Scan0;
+	bmpStride = bmpData.Stride;
+	for (int j = 0; j < (int)file->bitmap->GetHeight(); j++) {
+		for (int i = 0; i < (int)file->bitmap->GetWidth(); i++) {
+			bmpPixel = pBmpScan[j * (int)bmpStride / 4 + i];
+			file->Hist.B.push_back(bmpPixel & 0xff) ;
+			file->Hist.G.push_back((bmpPixel & 0xff00) >> 8);
+			file->Hist.R.push_back((bmpPixel & 0xff0000) >> 16);
+		}
+	}
+}
+
+
+void CTSSDlg::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+	Gdiplus::GdiplusShutdown(gdiplusToken);
 }
