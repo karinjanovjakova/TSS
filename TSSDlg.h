@@ -5,12 +5,34 @@
 #pragma once
 # include <vector>
 # include<string>
+# include<gdipluspen.h>
+
+class CStaticImage : public CStatic
+{
+public:
+	void DrawItem(LPDRAWITEMSTRUCT plDrawItemStruct) override;
+};
+
+class CStaticHistogram : public CStatic
+{
+public:
+	void DrawItem(LPDRAWITEMSTRUCT plDrawItemStruct) override;
+};
+
+typedef struct
+{
+	std::vector<double> R;
+	std::vector<double> G;
+	std::vector<double> B;
+}Histo;
 
 typedef struct
 {
 	CString FileName;
 	CString FilePath;
-
+	Histo Hist;
+	int cHist=0;
+	Gdiplus::Bitmap* bitmap=nullptr;
 }FileInfo;
 
 
@@ -19,9 +41,11 @@ class CTSSDlg : public CDialogEx
 {
 // Construction
 public:
+	CMenu m_menu;
+
 	CTSSDlg(CWnd* pParent = nullptr);	// standard constructor
-	CStatic m_staticImage;
-	CStatic m_staticHistogram;
+	CStaticImage m_staticImage;
+	CStaticHistogram m_staticHistogram;
 	CListCtrl m_fileList;
 
 	CRect rect;
@@ -40,6 +64,13 @@ public:
 
 	std::vector<FileInfo> m_loadedFiles;
 
+	Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+	ULONG_PTR gdiplusToken;
+
+	enum {
+		WM_DRAW_IMAGE = WM_USER,
+		WM_DRAW_HISTOGRAM = WM_USER+1
+	};
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
@@ -63,6 +94,18 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
+	afx_msg void OnHistogramR();
+	afx_msg void OnHistogramG();
+	afx_msg void OnHistogramB();
 	afx_msg void OnFileOpen();
-	afx_msg void OnFileClose();
+	afx_msg void OnFileClose(); 
+	afx_msg LRESULT OnDrawImage(WPARAM wparam, LPARAM lparam);
+	afx_msg LRESULT OnDrawHist(WPARAM wparam, LPARAM lparam);
+	afx_msg void OnDestroy();
+	void CalcHistStruct(FileInfo* file);
+
+	afx_msg void OnLvnItemChangedFileList(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnStnClickedStaticImage();
 };
+
+
