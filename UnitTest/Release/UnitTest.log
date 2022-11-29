@@ -1,0 +1,8 @@
+﻿  pch.cpp
+  UnitTest.cpp
+     Creating library C:\Users\kjano\source\repos\TSS2p\TSS\Release\UnitTest.lib and object C:\Users\kjano\source\repos\TSS2p\TSS\Release\UnitTest.exp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 272 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  UnitTest.vcxproj -> C:\Users\kjano\source\repos\TSS2p\TSS\Release\UnitTest.dll

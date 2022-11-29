@@ -1,0 +1,8 @@
+﻿  UnitTest.cpp
+     Creating library C:\Users\kjano\source\repos\TSS2p\TSS\x64\Release\UnitTest.lib and object C:\Users\kjano\source\repos\TSS2p\TSS\x64\Release\UnitTest.exp
+  Generating code
+  3 of 272 functions ( 1.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  UnitTest.vcxproj -> C:\Users\kjano\source\repos\TSS2p\TSS\x64\Release\UnitTest.dll
