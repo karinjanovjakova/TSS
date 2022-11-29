@@ -50,8 +50,6 @@ END_MESSAGE_MAP()
 
 // CTSSDlg dialog
 
-
-
 CTSSDlg::CTSSDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_TSS_DIALOG, pParent)
 {
@@ -76,6 +74,10 @@ BEGIN_MESSAGE_MAP(CTSSDlg, CDialogEx)
 	ON_COMMAND(ID_HISTOGRAM_R, &CTSSDlg::OnHistogramR)
 	ON_COMMAND(ID_HISTOGRAM_G, &CTSSDlg::OnHistogramG)
 	ON_COMMAND(ID_HISTOGRAM_B, &CTSSDlg::OnHistogramB)
+	ON_COMMAND(ID_ROTATION_ORIGINAL, &CTSSDlg::OnRotation0)
+	ON_COMMAND(ID_ROTATION_90, &CTSSDlg::OnRotation90)
+	ON_COMMAND(ID_ROTATION_180, &CTSSDlg::OnRotation180)
+	ON_COMMAND(ID_ROTATION_270, &CTSSDlg::OnRotation270)
 	ON_MESSAGE(WM_DRAW_IMAGE, OnDrawImage)
 	ON_MESSAGE(WM_DRAW_HISTOGRAM, OnDrawHist)
 	ON_NOTIFY(LVN_ITEMCHANGED,IDC_FILE_LIST, &CTSSDlg::OnLvnItemChangedFileList)
@@ -90,8 +92,8 @@ BEGIN_MESSAGE_MAP(CTSSDlg, CDialogEx)
 	ON_WM_DESTROY()
 	//ON_NOTIFY(HDN_ITEMCHANGED, 0, &CTSSDlg::OnItemchangedFileList)
 	ON_STN_CLICKED(IDC_STATIC_IMAGE, &CTSSDlg::OnStnClickedStaticImage)
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
-
 
 // CTSSDlg message handlers
 
@@ -191,8 +193,6 @@ HCURSOR CTSSDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
-
 void CTSSDlg::OnSize(UINT nType, int cx, int cy)
 {
 	//CRect rect;
@@ -210,7 +210,6 @@ void CTSSDlg::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
-
 BOOL CAboutDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
@@ -220,7 +219,6 @@ BOOL CAboutDlg::OnInitDialog()
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
-
 
 void CTSSDlg::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI)
 {
@@ -232,7 +230,91 @@ void CTSSDlg::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI)
 	CDialogEx::OnGetMinMaxInfo(lpMMI);
 }
 
+void CTSSDlg::OnRotation0() {
+	CMenu* mmenu = GetMenu();
+	CMenu* submenu = mmenu->GetSubMenu(2);
 
+	MENUITEMINFO info;
+	info.cbSize = sizeof(MENUITEMINFO); // must fill up this field
+	info.fMask = MIIM_STATE;             // get the state of the menu item
+	VERIFY(submenu->GetMenuItemInfo(ID_ROTATION_ORIGINAL, &info));
+
+	if (info.fState & MF_CHECKED) {
+		submenu->CheckMenuItem(ID_ROTATION_ORIGINAL, MF_CHECKED | MF_BYCOMMAND);
+	}
+	else {
+		submenu->CheckMenuItem(ID_ROTATION_ORIGINAL, MF_CHECKED | MF_BYCOMMAND);
+		submenu->CheckMenuItem(ID_ROTATION_90, MF_UNCHECKED | MF_BYCOMMAND);
+		submenu->CheckMenuItem(ID_ROTATION_180, MF_UNCHECKED | MF_BYCOMMAND);
+		submenu->CheckMenuItem(ID_ROTATION_270, MF_UNCHECKED | MF_BYCOMMAND);
+	}
+	Invalidate(1);
+}
+
+void CTSSDlg::OnRotation90() {
+	CMenu* mmenu = GetMenu();
+	CMenu* submenu = mmenu->GetSubMenu(2);
+
+	MENUITEMINFO info;
+	info.cbSize = sizeof(MENUITEMINFO); // must fill up this field
+	info.fMask = MIIM_STATE;             // get the state of the menu item
+	VERIFY(submenu->GetMenuItemInfo(ID_ROTATION_90, &info));
+	if (info.fState & MF_CHECKED) {
+		submenu->CheckMenuItem(ID_ROTATION_90, MF_UNCHECKED | MF_BYCOMMAND);
+		submenu->CheckMenuItem(ID_ROTATION_ORIGINAL, MF_CHECKED | MF_BYCOMMAND);
+	}
+	else {
+		submenu->CheckMenuItem(ID_ROTATION_ORIGINAL, MF_UNCHECKED | MF_BYCOMMAND);
+		submenu->CheckMenuItem(ID_ROTATION_90, MF_CHECKED | MF_BYCOMMAND);
+		submenu->CheckMenuItem(ID_ROTATION_180, MF_UNCHECKED | MF_BYCOMMAND);
+		submenu->CheckMenuItem(ID_ROTATION_270, MF_UNCHECKED | MF_BYCOMMAND);
+	}
+	Invalidate(1);
+}
+
+void CTSSDlg::OnRotation180() {
+	CMenu* mmenu = GetMenu();
+	CMenu* submenu = mmenu->GetSubMenu(2);
+
+	MENUITEMINFO info;
+	info.cbSize = sizeof(MENUITEMINFO); // must fill up this field
+	info.fMask = MIIM_STATE;             // get the state of the menu item
+	VERIFY(submenu->GetMenuItemInfo(ID_ROTATION_180, &info));
+
+	if (info.fState & MF_CHECKED) {
+		submenu->CheckMenuItem(ID_ROTATION_180, MF_UNCHECKED | MF_BYCOMMAND);
+		submenu->CheckMenuItem(ID_ROTATION_ORIGINAL, MF_CHECKED | MF_BYCOMMAND);
+	}
+	else {
+		submenu->CheckMenuItem(ID_ROTATION_ORIGINAL, MF_UNCHECKED | MF_BYCOMMAND);
+		submenu->CheckMenuItem(ID_ROTATION_90, MF_UNCHECKED | MF_BYCOMMAND);
+		submenu->CheckMenuItem(ID_ROTATION_180, MF_CHECKED | MF_BYCOMMAND);
+		submenu->CheckMenuItem(ID_ROTATION_270, MF_UNCHECKED | MF_BYCOMMAND);
+	}
+	Invalidate(1);
+}
+
+void CTSSDlg::OnRotation270() {
+	CMenu* mmenu = GetMenu();
+	CMenu* submenu = mmenu->GetSubMenu(2);
+
+	MENUITEMINFO info;
+	info.cbSize = sizeof(MENUITEMINFO); // must fill up this field
+	info.fMask = MIIM_STATE;             // get the state of the menu item
+	VERIFY(submenu->GetMenuItemInfo(ID_ROTATION_270, &info));
+
+	if (info.fState & MF_CHECKED) {
+		submenu->CheckMenuItem(ID_ROTATION_270, MF_UNCHECKED | MF_BYCOMMAND);
+		submenu->CheckMenuItem(ID_ROTATION_ORIGINAL, MF_CHECKED | MF_BYCOMMAND);
+	}
+	else{
+		submenu->CheckMenuItem(ID_ROTATION_ORIGINAL, MF_UNCHECKED | MF_BYCOMMAND);
+		submenu->CheckMenuItem(ID_ROTATION_90, MF_UNCHECKED | MF_BYCOMMAND);
+		submenu->CheckMenuItem(ID_ROTATION_180, MF_UNCHECKED | MF_BYCOMMAND);
+		submenu->CheckMenuItem(ID_ROTATION_270, MF_CHECKED | MF_BYCOMMAND);
+	}
+	Invalidate(1);
+}
 
 void CTSSDlg::OnHistogramR() {
 	CMenu* mmenu = GetMenu();
@@ -338,6 +420,8 @@ void CTSSDlg::OnFileClose()
 		m_fileList.InsertItem(m_loadedFiles.size(), m_loadedFiles[i].FileName);
 		m_fileList.Update(m_loadedFiles.size());
 	}
+	m_fileList.SetItemState(0, LVIS_SELECTED, LVIS_SELECTED);
+	OnRotation0();
 	Invalidate(1);
 }
 
@@ -355,22 +439,192 @@ LRESULT CTSSDlg::OnDrawImage(WPARAM wParam, LPARAM lparam) {
 	LPDRAWITEMSTRUCT lpDI = (LPDRAWITEMSTRUCT)wParam;
 	if (lpDI == nullptr)
 		return LRESULT();
-
 	Gdiplus::Graphics* GraphCDC = Gdiplus::Graphics::FromHDC(lpDI->hDC);
-	int nIndex = -1;;
+	int nIndex = -1;
 	nIndex = m_fileList.GetNextItem(nIndex, LVNI_SELECTED);
-	if (nIndex != -1) {
+	if (nIndex != -1) {		
+		bool orig = FALSE, rot90 = FALSE, rot180 = FALSE, rot270 = FALSE;		//zistíme ako otoèený obrázok chceme vykresli
+		CMenu* mmenu = GetMenu();
+		MENUITEMINFO info;
+		info.cbSize = sizeof(MENUITEMINFO);
+		info.fMask = MIIM_STATE;
+		VERIFY(mmenu->GetSubMenu(2)->GetMenuItemInfo(ID_ROTATION_ORIGINAL, &info));
+		if (info.fState & MF_CHECKED) {//originál sa vykreslí
+			orig = TRUE;
+		}
+		VERIFY(mmenu->GetSubMenu(2)->GetMenuItemInfo(ID_ROTATION_90, &info));
+		if (info.fState & MF_CHECKED) {//rotacia o 90 sa vykres¾uje.
+			rot90 = TRUE;
+		}
+		VERIFY(mmenu->GetSubMenu(2)->GetMenuItemInfo(ID_ROTATION_180, &info));
+		if (info.fState & MF_CHECKED) {//rotacia o 180 sa vykres¾uje. 
+			rot180 = TRUE;
+		}
+		VERIFY(mmenu->GetSubMenu(2)->GetMenuItemInfo(ID_ROTATION_270, &info));
+		if (info.fState & MF_CHECKED) {//rotacia o 270 sa vykres¾uje. 
+			rot270 = TRUE;
+		}
+		
 		m_staticImage.GetWindowRect(&rect);
 		double height = rect.Height();
 		double width = rect.Width();
 		double heightI = m_loadedFiles[nIndex].bitmap->GetHeight();
-		double widthI = m_loadedFiles[nIndex].bitmap->GetWidth(); 
-		if ((height / heightI) * widthI > width ){
-			GraphCDC->DrawImage(m_loadedFiles[nIndex].bitmap, 0, 0, width, (width / widthI) * heightI);
+		double widthI = m_loadedFiles[nIndex].bitmap->GetWidth();
+		
+		if (orig) {
+			if ((height / heightI) * widthI > width) {
+				GraphCDC->DrawImage(m_loadedFiles[nIndex].bitmap, 0, 0, width, (width / widthI) * heightI);
+			}
+			if ((width / widthI) * heightI > height)
+				GraphCDC->DrawImage(m_loadedFiles[nIndex].bitmap, 0, 0, (height / heightI) * widthI, height);
 		}
-		if ((width / widthI) * heightI > height)
-			GraphCDC->DrawImage(m_loadedFiles[nIndex].bitmap, 0, 0, (height / heightI) * widthI, height);
-		//GraphCDC->DrawImage(m_loadedFiles[nIndex].bitmap, 0, 0, (height / heightI) * widthI, (width / widthI) * heightI);
+		if (rot90) {
+			m_loadedFiles[nIndex].bitmap->RotateFlip(Gdiplus::Rotate90FlipNone);
+			if ((height / widthI) * heightI > width) 
+				GraphCDC->DrawImage(m_loadedFiles[nIndex].bitmap, 0, 0, width, (width / heightI) * widthI);
+			if ((width / heightI) * widthI > height)
+				GraphCDC->DrawImage(m_loadedFiles[nIndex].bitmap, 0, 0, (height / widthI) * heightI, height);
+			m_loadedFiles[nIndex].bitmap->RotateFlip(Gdiplus::Rotate270FlipNone);
+		}
+		if (rot180) {
+			m_loadedFiles[nIndex].bitmap->RotateFlip(Gdiplus::Rotate180FlipNone);
+			if ((height / heightI) * widthI > width) 
+				GraphCDC->DrawImage(m_loadedFiles[nIndex].bitmap, 0, 0, width, (width / widthI) * heightI);
+			if ((width / widthI) * heightI > height)
+				GraphCDC->DrawImage(m_loadedFiles[nIndex].bitmap, 0, 0, (height / heightI) * widthI, height);
+			m_loadedFiles[nIndex].bitmap->RotateFlip(Gdiplus::Rotate180FlipNone);
+		}
+		if (rot270) {
+			m_loadedFiles[nIndex].bitmap->RotateFlip(Gdiplus::Rotate270FlipNone);
+			if ((height / widthI) * heightI > width) 
+				GraphCDC->DrawImage(m_loadedFiles[nIndex].bitmap, 0, 0, width, (width / heightI) * widthI);
+			if ((width / heightI) * widthI > height)
+				GraphCDC->DrawImage(m_loadedFiles[nIndex].bitmap, 0, 0, (height / widthI) * heightI, height);
+			m_loadedFiles[nIndex].bitmap->RotateFlip(Gdiplus::Rotate90FlipNone);
+		}
+
+		/*
+		m_staticImage.GetWindowRect(&rect);
+		double height = rect.Height();
+		double width = rect.Width();
+		double heightI = m_loadedFiles[nIndex].bitmap->GetHeight();
+		double widthI = m_loadedFiles[nIndex].bitmap->GetWidth();
+		double heightTemp=0, widthTemp=0;
+		Gdiplus::Color pixelColor;
+
+		
+		if (orig) {
+			if ((height / heightI) * widthI > width) {
+				GraphCDC->DrawImage(m_loadedFiles[nIndex].bitmap, 0, 0, width, (width / widthI) * heightI);
+			}
+			if ((width / widthI) * heightI > height)
+				GraphCDC->DrawImage(m_loadedFiles[nIndex].bitmap, 0, 0, (height / heightI) * widthI, height);
+		}
+		if (rot90) {
+			Gdiplus::BitmapData bmpData;
+			Gdiplus::Rect bmpRect(0, 0, m_loadedFiles[nIndex].bitmap->GetWidth(), m_loadedFiles[nIndex].bitmap->GetHeight());
+			unsigned int* pBmpScan;
+			unsigned int bmpPixel;
+			unsigned int bmpStride;
+			m_loadedFiles[nIndex].bitmap->LockBits(&bmpRect, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB, &bmpData);
+			pBmpScan = (unsigned int*)bmpData.Scan0;
+			bmpStride = bmpData.Stride;
+
+			Gdiplus::Bitmap* image = new Gdiplus::Bitmap(heightI, widthI, GraphCDC);
+			Gdiplus::BitmapData bmpData2;
+			Gdiplus::Rect bmpRect2(0, 0, image->GetWidth(), image->GetHeight());
+			unsigned int* pBmpScan2;
+			unsigned int bmpStride2;
+			image->LockBits(&bmpRect2, Gdiplus::ImageLockModeWrite, PixelFormat32bppARGB, &bmpData2);
+			pBmpScan2 = (unsigned int*)bmpData2.Scan0;
+			bmpStride2 = bmpData2.Stride;
+			for (int j = 0; j < (int)m_loadedFiles[nIndex].bitmap->GetHeight(); j++) {
+				for (int i = 0; i < (int)m_loadedFiles[nIndex].bitmap->GetWidth(); i++) {
+					bmpPixel = pBmpScan[((int)m_loadedFiles[nIndex].bitmap->GetHeight()-1-j) * (int)bmpStride / 4 +  i];
+					pBmpScan2[i * (int)bmpStride2 / 4 + j] = bmpPixel;
+				}
+			}
+			m_loadedFiles[nIndex].bitmap->UnlockBits(&bmpData);
+			image->UnlockBits(&bmpData2);
+			//vykreslenie
+			heightI = image->GetHeight();
+			widthI = image->GetWidth();
+			if ((height / heightI) * widthI > width) {
+				GraphCDC->DrawImage(image, 0, 0, width, (width / widthI) * heightI);
+			}
+			if ((width / widthI) * heightI > height)
+				GraphCDC->DrawImage(image, 0, 0, (height / heightI) * widthI, height);
+		}
+		if (rot180) {
+			Gdiplus::BitmapData bmpData;
+			Gdiplus::Rect bmpRect(0, 0, m_loadedFiles[nIndex].bitmap->GetWidth(), m_loadedFiles[nIndex].bitmap->GetHeight());
+			unsigned int* pBmpScan;
+			unsigned int bmpPixel;
+			unsigned int bmpStride;
+			m_loadedFiles[nIndex].bitmap->LockBits(&bmpRect, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB, &bmpData);
+			pBmpScan = (unsigned int*)bmpData.Scan0;
+			bmpStride = bmpData.Stride;
+
+			Gdiplus::Bitmap* image = new Gdiplus::Bitmap(widthI, heightI, GraphCDC);
+			Gdiplus::BitmapData bmpData2;
+			Gdiplus::Rect bmpRect2(0, 0, image->GetWidth(), image->GetHeight());
+			unsigned int* pBmpScan2;
+			unsigned int bmpStride2;
+			image->LockBits(&bmpRect2, Gdiplus::ImageLockModeWrite, PixelFormat32bppARGB, &bmpData2);
+			pBmpScan2 = (unsigned int*)bmpData2.Scan0;
+			bmpStride2 = bmpData2.Stride;
+			for (int j = 0; j < (int)m_loadedFiles[nIndex].bitmap->GetHeight(); j++) {
+				for (int i = 0; i < (int)m_loadedFiles[nIndex].bitmap->GetWidth(); i++) {
+					bmpPixel = pBmpScan[j * (int)bmpStride / 4 + i];
+					pBmpScan2[((int)m_loadedFiles[nIndex].bitmap->GetHeight() - 1 - j) * (int)bmpStride2 / 4 + ((int)m_loadedFiles[nIndex].bitmap->GetWidth()-1-i)] = bmpPixel;
+				}
+			}
+			m_loadedFiles[nIndex].bitmap->UnlockBits(&bmpData);
+			image->UnlockBits(&bmpData2);
+			//vykreslenie
+			heightI = image->GetHeight();
+			widthI = image->GetWidth();
+			if ((height / heightI) * widthI > width) {
+				GraphCDC->DrawImage(image, 0, 0, width, (width / widthI) * heightI);
+			}
+			if ((width / widthI) * heightI > height)
+				GraphCDC->DrawImage(image, 0, 0, (height / heightI) * widthI, height);
+		}
+		if (rot270) {
+			Gdiplus::BitmapData bmpData;
+			Gdiplus::Rect bmpRect(0, 0, m_loadedFiles[nIndex].bitmap->GetWidth(), m_loadedFiles[nIndex].bitmap->GetHeight());
+			unsigned int* pBmpScan;
+			unsigned int bmpPixel;
+			unsigned int bmpStride;
+			m_loadedFiles[nIndex].bitmap->LockBits(&bmpRect, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB, &bmpData);
+			pBmpScan = (unsigned int*)bmpData.Scan0;
+			bmpStride = bmpData.Stride;
+
+			Gdiplus::Bitmap* image = new Gdiplus::Bitmap(heightI, widthI, GraphCDC);
+			Gdiplus::BitmapData bmpData2;
+			Gdiplus::Rect bmpRect2(0, 0, image->GetWidth(), image->GetHeight());
+			unsigned int* pBmpScan2;
+			unsigned int bmpStride2;
+			image->LockBits(&bmpRect2, Gdiplus::ImageLockModeWrite, PixelFormat32bppARGB, &bmpData2);
+			pBmpScan2 = (unsigned int*)bmpData2.Scan0;
+			bmpStride2 = bmpData2.Stride;
+			for (int j = 0; j < (int)m_loadedFiles[nIndex].bitmap->GetHeight(); j++) {
+				for (int i = 0; i < (int)m_loadedFiles[nIndex].bitmap->GetWidth(); i++) {
+					bmpPixel = pBmpScan[j * (int)bmpStride / 4 + ((int)m_loadedFiles[nIndex].bitmap->GetWidth()-1-i)];
+					pBmpScan2[i * (int)bmpStride2 / 4 + j] = bmpPixel;
+				}
+			}
+			m_loadedFiles[nIndex].bitmap->UnlockBits(&bmpData);
+			image->UnlockBits(&bmpData2);
+			//vykreslenie
+			heightI = image->GetHeight();
+			widthI = image->GetWidth();
+			if ((height / heightI) * widthI > width) {
+				GraphCDC->DrawImage(image, 0, 0, width, (width / widthI) * heightI);
+			}
+			if ((width / widthI) * heightI > height)
+				GraphCDC->DrawImage(image, 0, 0, (height / heightI) * widthI, height);
+		}	*/
 	}
 	return LRESULT();
 
@@ -410,11 +664,17 @@ LRESULT CTSSDlg::OnDrawHist(WPARAM wParam, LPARAM lparam) {
 		b = TRUE;
 	}
 	nIndex = m_fileList.GetNextItem(nIndex, LVNI_SELECTED);
-	if (nIndex != -1 && countH>0) {
-		if (m_loadedFiles[nIndex].cHist == 0) {
-			CalcHistStruct(&m_loadedFiles[nIndex]);
-			AfxMessageBox(_T("Wooo vypoèítal som histogram!!"));
+	if (nIndex != -1 && countH > 0) {
+		if (m_loadedFiles[nIndex].cHist == 0 && m_loadedFiles[nIndex].cHistStarted == false) {
+			//CalcHistStruct(nIndex);
+			int timer = int(SetTimer(nIndex + 1, 1000, NULL));
+			if (timer != 0) {
+				std::thread calc(&CTSSDlg::CalcHistStruct, this, nIndex);
+				calc.detach();
+			}
 		}
+	}
+	if (nIndex != -1 && countH > 0 && m_loadedFiles[nIndex].cHist == 1 && m_loadedFiles[nIndex].cHistStarted == false) {
 		if (r) {//R sa vykres¾uje. Pozrieme aká je max hodnota.
 			maxr = 0;
 			for (int i = 0; i < m_loadedFiles[nIndex].Hist.R.size(); i++) {
@@ -510,8 +770,11 @@ LRESULT CTSSDlg::OnDrawHist(WPARAM wParam, LPARAM lparam) {
 	return LRESULT();
 }
 
-
-void CTSSDlg::CalcHistStruct(FileInfo* file) {
+void CTSSDlg::CalcHistStruct(int nIndex) {
+	FileInfo* file;
+	//AfxMessageBox(_T("Wooo histogram!!"));
+	file = &m_loadedFiles[nIndex];
+	file->cHistStarted = true;
 	Gdiplus::BitmapData bmpData;
 	Gdiplus::Rect bmpRect(0, 0, file->bitmap->GetWidth(), file->bitmap->GetHeight());
 	unsigned int* pBmpScan;
@@ -526,6 +789,7 @@ void CTSSDlg::CalcHistStruct(FileInfo* file) {
 	bmpStride = bmpData.Stride;
 	for (int j = 0; j < (int)file->bitmap->GetHeight(); j++) {
 		for (int i = 0; i < (int)file->bitmap->GetWidth(); i++) {
+			//Sleep(5);
 			bmpPixel = pBmpScan[j * (int)bmpStride / 4 + i];
 			b=(bmpPixel & 0xff) ;
 			g=(bmpPixel & 0xff00) >> 8;
@@ -536,9 +800,9 @@ void CTSSDlg::CalcHistStruct(FileInfo* file) {
 		}
 	}
 	file->cHist = 1;
+	file->cHistStarted = false;
 	file->bitmap->UnlockBits(&bmpData);
 }
-
 
 void CTSSDlg::OnDestroy()
 {
@@ -550,13 +814,23 @@ void CTSSDlg::OnLvnItemChangedFileList(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
 	// TODO: Add your control notification handler code here
-	*pResult = 0;
+	*pResult = 0; 
+	OnRotation0();
 	Invalidate(1);
 }
-
-
 
 void CTSSDlg::OnStnClickedStaticImage()
 {
 	// TODO: Add your control notification handler code here
+}
+
+void CTSSDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	int nIndex = -1;
+	nIndex = m_fileList.GetNextItem(nIndex, LVNI_SELECTED);
+	if (m_loadedFiles[nIndex].cHist == 1) {
+		m_staticHistogram.Invalidate(1);
+		KillTimer(nIDEvent);
+	}
+	//CDialogEx::OnTimer(nIDEvent);
 }

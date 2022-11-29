@@ -6,6 +6,7 @@
 # include <vector>
 # include<string>
 # include<gdipluspen.h>
+#include <thread>
 
 class CStaticImage : public CStatic
 {
@@ -32,6 +33,7 @@ typedef struct
 	CString FilePath;
 	Histo Hist;
 	int cHist=0;
+	bool cHistStarted = false;
 	Gdiplus::Bitmap* bitmap=nullptr;
 }FileInfo;
 
@@ -97,15 +99,20 @@ public:
 	afx_msg void OnHistogramR();
 	afx_msg void OnHistogramG();
 	afx_msg void OnHistogramB();
+	afx_msg void OnRotation0();
+	afx_msg void OnRotation90();
+	afx_msg void OnRotation180();
+	afx_msg void OnRotation270();
 	afx_msg void OnFileOpen();
 	afx_msg void OnFileClose(); 
 	afx_msg LRESULT OnDrawImage(WPARAM wparam, LPARAM lparam);
 	afx_msg LRESULT OnDrawHist(WPARAM wparam, LPARAM lparam);
 	afx_msg void OnDestroy();
-	void CalcHistStruct(FileInfo* file);
+	void CalcHistStruct(int index);
 
 	afx_msg void OnLvnItemChangedFileList(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnStnClickedStaticImage();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };
 
 
