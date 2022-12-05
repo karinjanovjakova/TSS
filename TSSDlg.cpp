@@ -114,6 +114,7 @@ BOOL CTSSDlg::OnInitDialog()
 	mstatich_Rborder = recth.right - mrecth.right;
 	mstatich_Bborder = recth.bottom - mrecth.bottom;
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+	m_loadedFiles.reserve(100);
 	// Add "About..." menu item to system menu.
 
 	// IDM_ABOUTBOX must be in the system command range.
@@ -408,6 +409,18 @@ void CTSSDlg::OnFileClose()
 {
 	int iCount = m_fileList.GetSelectedCount();
 	int nIndex = -1;
+	bool calculating=false;
+	for (int i = 0; i < m_loadedFiles.size(); i++) {
+		if (m_loadedFiles[i].cHistStarted == true)
+			calculating = true;
+	}
+	if (calculating) {
+		AfxMessageBox(_T("Unable to close files. Try again later."));
+		return;
+	}
+
+	 iCount = m_fileList.GetSelectedCount();
+	 nIndex = -1;
 	for (int i = 0; i < iCount; i++)
 	{
 		nIndex = m_fileList.GetNextItem(nIndex, LVNI_SELECTED);
@@ -669,7 +682,7 @@ LRESULT CTSSDlg::OnDrawHist(WPARAM wParam, LPARAM lparam) {
 			//CalcHistStruct(nIndex);
 			int timer = int(SetTimer(nIndex + 1, 1000, NULL));
 			if (timer != 0) {
-				std::thread calc(&CTSSDlg::CalcHistStruct, this, nIndex);
+				std:: thread calc(&CTSSDlg::CalcHistStruct, this, nIndex);
 				calc.detach();
 			}
 		}
@@ -770,13 +783,16 @@ LRESULT CTSSDlg::OnDrawHist(WPARAM wParam, LPARAM lparam) {
 	return LRESULT();
 }
 
-void CTSSDlg::CalcHistStruct(int nIndex) {
+/*void CTSSDlg::CalcHistStruct(int nIndex) {
 	FileInfo* file;
 	//AfxMessageBox(_T("Wooo histogram!!"));
 	file = &m_loadedFiles[nIndex];
 	file->cHistStarted = true;
+	
 	Gdiplus::BitmapData bmpData;
 	Gdiplus::Rect bmpRect(0, 0, file->bitmap->GetWidth(), file->bitmap->GetHeight());
+
+	Gdiplus::Bitmap* bitmap = file->bitmap->Clone(bmpRect, PixelFormat32bppARGB);
 	unsigned int* pBmpScan;
 	unsigned int bmpPixel;
 	unsigned int bmpStride;
@@ -802,6 +818,63 @@ void CTSSDlg::CalcHistStruct(int nIndex) {
 	file->cHist = 1;
 	file->cHistStarted = false;
 	file->bitmap->UnlockBits(&bmpData);
+}*/
+
+void CTSSDlg::CalcHistStruct(int nIndex) {
+	FileInfo* file;
+	//AfxMessageBox(_T("Wooo histogram!!"));
+	file = &m_loadedFiles[nIndex];
+	file->cHistStarted = true;
+
+	Gdiplus::BitmapData bmpData;
+	Gdiplus::Rect bmpRect(0, 0, file->bitmap->GetWidth(), file->bitmap->GetHeight());
+
+	Gdiplus::Bitmap* bitmap = file->bitmap->Clone(bmpRect, PixelFormat32bppARGB);
+	unsigned int* pBmpScan;
+	unsigned int bmpPixel;
+	unsigned int bmpStride;
+	if (bitmap == NULL) {
+		int pos = nIndex + 1;
+		file->cHistStarted = false;
+		KillTimer(pos);
+		CString temp;
+		temp.Format(L"%d", pos);
+		AfxMessageBox(_T("Computing histogram failed. Try again for picture on position ") + temp);
+		return;
+	}
+	bitmap->LockBits(&bmpRect, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB, &bmpData); 
+	/*Histo Hist;
+	Hist.R.resize(256, 0);
+	Hist.G.resize(256, 0);
+	Hist.B.resize(256, 0);*/
+
+	std::vector<double> R;
+	std::vector<double> G;
+	std::vector<double> B;
+	R.resize(256, 0);
+	G.resize(256, 0);
+	B.resize(256, 0);
+	int r, g, b;
+	pBmpScan = (unsigned int*)bmpData.Scan0;
+	bmpStride = bmpData.Stride;
+	for (int j = 0; j < (int)bitmap->GetHeight(); j++) {
+		for (int i = 0; i < (int)bitmap->GetWidth(); i++) {
+			//Sleep(5);
+			bmpPixel = pBmpScan[j * (int)bmpStride / 4 + i];
+			b = (bmpPixel & 0xff);
+			g = (bmpPixel & 0xff00) >> 8;
+			r = (bmpPixel & 0xff0000) >> 16;
+			B[b] += 1;
+			G[g] += 1;
+			R[r] += 1;
+		}
+	}
+	file->Hist.R = R;
+	file->Hist.G = G;
+	file->Hist.B = B;
+	file->cHist = 1;
+	file->cHistStarted = false;
+	bitmap->UnlockBits(&bmpData);
 }
 
 void CTSSDlg::OnDestroy()
@@ -826,11 +899,11 @@ void CTSSDlg::OnStnClickedStaticImage()
 
 void CTSSDlg::OnTimer(UINT_PTR nIDEvent)
 {
-	int nIndex = -1;
-	nIndex = m_fileList.GetNextItem(nIndex, LVNI_SELECTED);
-	if (m_loadedFiles[nIndex].cHist == 1) {
+	int nIndex = nIDEvent -1;
+	if (nIndex>-1 && m_loadedFiles[nIndex].cHist == 1) {
 		m_staticHistogram.Invalidate(1);
 		KillTimer(nIDEvent);
 	}
+	m_staticImage.Invalidate(1);
 	//CDialogEx::OnTimer(nIDEvent);
 }

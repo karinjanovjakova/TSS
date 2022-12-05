@@ -70,8 +70,8 @@ public:
 	ULONG_PTR gdiplusToken;
 
 	enum {
-		WM_DRAW_IMAGE = WM_USER,
-		WM_DRAW_HISTOGRAM = WM_USER+1
+		WM_DRAW_IMAGE = WM_USER+1,
+		WM_DRAW_HISTOGRAM = WM_USER+2
 	};
 
 // Dialog Data
