@@ -34,7 +34,16 @@ typedef struct
 	Histo Hist;
 	int cHist=0;
 	bool cHistStarted = false;
-	Gdiplus::Bitmap* bitmap=nullptr;
+	bool c90 = false;
+	bool c180 = false;
+	bool c270 = false;
+	bool c90start = false;
+	bool c180start = false;
+	bool c270start = false;
+	Gdiplus::Bitmap* bitmap = nullptr;
+	Gdiplus::Bitmap* bitmap90 = nullptr;
+	Gdiplus::Bitmap* bitmap180 = nullptr;
+	Gdiplus::Bitmap* bitmap270 = nullptr;
 }FileInfo;
 
 
@@ -109,6 +118,9 @@ public:
 	afx_msg LRESULT OnDrawHist(WPARAM wparam, LPARAM lparam);
 	afx_msg void OnDestroy();
 	void CalcHistStruct(int index);
+	void Calc90Struct(int index);
+	void Calc180Struct(int index);
+	void Calc270Struct(int index);
 
 	afx_msg void OnLvnItemChangedFileList(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnStnClickedStaticImage();
